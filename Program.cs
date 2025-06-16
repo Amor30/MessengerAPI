@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using MessengerAPI.Models;
+using Microsoft.AspNetCore.Identity;
+
 namespace MessengerAPI;
 
 public class Program
@@ -7,11 +11,19 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+
+        // Регистрация DbContext с подключением к SQL Server
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        // Регистрация Identity
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
+                options.SignIn.RequireConfirmedAccount = false)
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
         var app = builder.Build();
 
@@ -22,8 +34,8 @@ public class Program
             app.UseSwaggerUI();
         }
 
+        app.UseAuthentication();
         app.UseAuthorization();
-
 
         app.MapControllers();
 
