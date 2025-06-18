@@ -16,20 +16,14 @@ public class UsersController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserDto userDto)
     {
-        var (success, result, error) = await _userService.CreateUser(userDto);
-        if (!success)
-            return BadRequest(new { Message = error });
-
-        return CreatedAtAction(nameof(Register), result);
+        var result = await _userService.CreateUser(userDto);
+        return result;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var (success, result, error) = await _userService.Login(loginDto);
-        if (!success)
-            return Unauthorized(new { Message = error });
-
-        return Ok(result);
+        var result = await _userService.Login(loginDto);
+        return result;
     }
 }

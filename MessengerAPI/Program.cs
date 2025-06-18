@@ -22,6 +22,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 
 // Регистрация UserService
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ChatService>();
 
 var app = builder.Build();
 

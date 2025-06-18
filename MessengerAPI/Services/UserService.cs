@@ -4,6 +4,7 @@ using System.Text;
 using MessengerAPI.Dto;
 using MessengerAPI.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 
@@ -23,14 +24,14 @@ public class UserService
         _configuration = configuration;
     }
 
-    public async Task<(bool Success, object Result, string ErrorMessage)> CreateUser(UserDto userDto)
+    public async Task<IActionResult> CreateUser(UserDto userDto)
     {
         // Валидация данных
         if (string.IsNullOrWhiteSpace(userDto.Email) || string.IsNullOrWhiteSpace(userDto.Username))
-            return (false, null, "Email and Username are required.");
-
-        if (string.IsNullOrWhiteSpace(userDto.Password) || userDto.Password.Length < 6)
-            return (false, null, "Password must be at least 6 characters long.");
+            return new BadRequestObjectResult(new { Message = "Email and Username are required" });
+        
+        if (await _userManager.FindByEmailAsync(userDto.Email) != null)
+            return new ConflictObjectResult(new { Message = "User with this email already exists" });
 
         var user = new ApplicationUser
         {
@@ -41,18 +42,18 @@ public class UserService
 
         var result = await _userManager.CreateAsync(user, userDto.Password);
         if (!result.Succeeded)
-            return (false, null, string.Join(", ", result.Errors.Select(e => e.Description)));
+            return new BadRequestObjectResult(new { Message = "Failed to create user", Errors = result.Errors });
         
         await _dbContext.SaveChangesAsync();
 
-        return (true, new { Id = user.Id, UserName = user.UserName, Email = user.Email }, null);
+        return new CreatedResult($"/user/{user.Id}", new { user.Id, user.UserName, user.Email});
     }
 
-    public async Task<(bool Success, object Result, string ErrorMessage)> Login(LoginDto loginDto)
+    public async Task<IActionResult> Login(LoginDto loginDto)
     {
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
-            return (false, null, "Invalid email or password");
+            return new UnauthorizedObjectResult(new { Message = "Invalid email or password" });
 
         var claims = new List<Claim>
         {
@@ -70,8 +71,10 @@ public class UserService
             claims: claims,
             signingCredentials: creds
         );
-
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-        return (true, new { Token = tokenString }, null);
+        
+        return new OkObjectResult(new
+        {
+            Token = new JwtSecurityTokenHandler().WriteToken(token),
+        });
     }
 }
