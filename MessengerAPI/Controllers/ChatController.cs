@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Azure.Core;
 using MessengerAPI.Dto;
 using MessengerAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +10,7 @@ namespace MessengerAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ChatController
+public class ChatController : ControllerBase
 {
     private readonly ChatService _chatService;
 
@@ -21,6 +23,22 @@ public class ChatController
     public async Task<IActionResult> CreateChat([FromBody] CreateChatDto createChatDto)
     {
         var result = await _chatService.CreateChat(createChatDto);
+        return result;
+    }
+
+    [HttpGet("link")]
+    public async Task<IActionResult> GetInvitationLink(int id)
+    {
+        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+        var result = await _chatService.GetInvitationLink(id, baseUrl);
+        return result;
+    }
+
+    [HttpPost("link")]
+    public async Task<IActionResult> JoinChat([FromQuery] Guid guid)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var result = await _chatService.JoinChatByLink(guid, int.Parse(userIdClaim));
         return result;
     }
 }

@@ -19,6 +19,7 @@ public class Chat
     public int Id_type_chat { get; set; }
     public Type_chat TypeChat { get; set; }
 
+    public Guid InvitationGuid { get; set; }
     // Навигационное свойство для User_chats
     public ICollection<User_chats> UserChats { get; set; } = new List<User_chats>();
 
