@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MessengerAPI.Controllers;
 
-public class BaseController : ControllerBase
+public abstract class BaseController : ControllerBase
 {
-    public int GetUserId()
+    protected int GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -13,5 +13,10 @@ public class BaseController : ControllerBase
             throw new UnauthorizedAccessException("Invalid or missing UserId in token.");
         }
         return userId;
+    }
+
+    protected string? GetClaimValue(string claimType)
+    {
+        return User.FindFirst(claimType)?.Value;
     }
 }
