@@ -6,9 +6,11 @@ namespace MessengerAPI.Models;
 public class Type_chat
 {
     [Key]
+    [Column("id")]
     public int Id { get; set; }
 
     [Required]
     [StringLength(10)]
+    [Column("name_type")]
     public string Name_type { get; set; }
 }
