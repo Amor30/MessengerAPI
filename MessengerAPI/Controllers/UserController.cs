@@ -1,10 +1,11 @@
+using MessengerAPI.Controllers;
 using MessengerAPI.Dto;
 using MessengerAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController : ControllerBase
+public class UsersController : BaseController
 {
     private readonly UserService _userService;
 

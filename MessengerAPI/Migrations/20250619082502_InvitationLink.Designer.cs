@@ -4,6 +4,7 @@ using MessengerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessengerAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250619082502_InvitationLink")]
+    partial class InvitationLink
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,13 +41,11 @@ namespace MessengerAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Create_date")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("create_date");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("email");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -64,8 +65,7 @@ namespace MessengerAPI.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("password");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
@@ -79,22 +79,20 @@ namespace MessengerAPI.Migrations
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("token");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("user_name");
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique()
-                        .HasFilter("[email] IS NOT NULL");
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -111,68 +109,57 @@ namespace MessengerAPI.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chat_name")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("chat_name");
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("Create_date")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("create_date");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Id_type_chat")
-                        .HasColumnType("int")
-                        .HasColumnName("id_type_chat");
+                        .HasColumnType("int");
 
                     b.Property<Guid>("InvitationGuid")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("guid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Id_type_chat");
 
-                    b.ToTable("tb_chat");
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("MessengerAPI.Models.Message", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Create_date")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("create_date");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Id_chat")
-                        .HasColumnType("int")
-                        .HasColumnName("id_chat");
+                        .HasColumnType("int");
 
                     b.Property<int>("Id_user")
-                        .HasColumnType("int")
-                        .HasColumnName("id_user");
+                        .HasColumnType("int");
 
                     b.Property<string>("Msg_text")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("Msg_text");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("User_name")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("user_name");
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -180,44 +167,40 @@ namespace MessengerAPI.Migrations
 
                     b.HasIndex("Id_user");
 
-                    b.ToTable("tb_message");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("MessengerAPI.Models.Type_chat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name_type")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("name_type");
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("tb_type_chat");
+                    b.ToTable("TypeChats");
                 });
 
             modelBuilder.Entity("MessengerAPI.Models.User_chats", b =>
                 {
                     b.Property<int>("Id_user")
-                        .HasColumnType("int")
-                        .HasColumnName("id_user");
+                        .HasColumnType("int");
 
                     b.Property<int>("Id_chat")
-                        .HasColumnType("int")
-                        .HasColumnName("id_chat");
+                        .HasColumnType("int");
 
                     b.HasKey("Id_user", "Id_chat");
 
                     b.HasIndex("Id_chat");
 
-                    b.ToTable("tb_user_chat");
+                    b.ToTable("UserChats");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>

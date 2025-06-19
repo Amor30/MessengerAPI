@@ -10,7 +10,7 @@ namespace MessengerAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ChatController : ControllerBase
+public class ChatController : BaseController
 {
     private readonly ChatService _chatService;
 
@@ -37,8 +37,8 @@ public class ChatController : ControllerBase
     [HttpPost("link")]
     public async Task<IActionResult> JoinChat([FromQuery] Guid guid)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var result = await _chatService.JoinChatByLink(guid, int.Parse(userIdClaim));
+        var userId = GetUserId();
+        var result = await _chatService.JoinChatByLink(guid, userId);
         return result;
     }
 }
