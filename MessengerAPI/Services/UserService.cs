@@ -24,41 +24,39 @@ public class UserService
         _configuration = configuration;
     }
 
-    public async Task<IActionResult> CreateUser(UserDto userDto)
+    public async Task<ApplicationUser> CreateUser(UserDto userDto)
     {
-        // Валидация данных
         if (string.IsNullOrWhiteSpace(userDto.Email) || string.IsNullOrWhiteSpace(userDto.Username))
-            return new BadRequestObjectResult(new { Message = "Email and Username are required" });
-        
+            throw new ArgumentException("Email and Username are required.");
+
         if (await _userManager.FindByEmailAsync(userDto.Email) != null)
-            return new ConflictObjectResult(new { Message = "User with this email already exists" });
+            throw new InvalidOperationException("User with this email already exists.");
 
         var user = new ApplicationUser
         {
             Email = userDto.Email,
             UserName = userDto.Username,
-            Create_date = DateTime.UtcNow
+            Create_date = DateTime.UtcNow,
+            Token = string.Empty
         };
 
         var result = await _userManager.CreateAsync(user, userDto.Password);
         if (!result.Succeeded)
-            return new BadRequestObjectResult(new { Message = "Failed to create user", Errors = result.Errors });
-        
-        await _dbContext.SaveChangesAsync();
+            throw new InvalidOperationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
-        return new CreatedResult($"/user/{user.Id}", new { user.Id, user.UserName, user.Email});
+        return user;
     }
 
-    public async Task<IActionResult> Login(LoginDto loginDto)
+    public async Task<string> Login(LoginDto loginDto)
     {
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
-            return new UnauthorizedObjectResult(new { Message = "Invalid email or password" });
+            throw new UnauthorizedAccessException("Invalid email or password.");
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Name, user.Email)
         };
 
         var jwtSettings = _configuration.GetSection("Jwt");
@@ -69,12 +67,10 @@ public class UserService
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
+            expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: creds
         );
-        
-        return new OkObjectResult(new
-        {
-            Token = new JwtSecurityTokenHandler().WriteToken(token),
-        });
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

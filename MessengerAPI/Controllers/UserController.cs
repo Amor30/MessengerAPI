@@ -17,14 +17,40 @@ public class UsersController : BaseController
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserDto userDto)
     {
-        var result = await _userService.CreateUser(userDto);
-        return result;
+        try
+        {
+            var user = await _userService.CreateUser(userDto);
+            return CreatedAtAction(nameof(Register), new { id = user.Id }, new { user.Id, user.UserName, user.Email });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var result = await _userService.Login(loginDto);
-        return result;
+        try
+        {
+            var token = await _userService.Login(loginDto);
+            return Ok(new { Token = token });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }
