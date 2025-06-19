@@ -33,7 +33,7 @@ public class ChatService
 
     public async Task<IActionResult> GetInvitationLink(int id, string baseUrl)
     {
-        var chat =  await _dbContext.Chats.FirstOrDefaultAsync(x => x.Id == id);
+        var chat = await _dbContext.Chats.FirstOrDefaultAsync(x => x.Id == id);
         if (chat == null)
         {
             return new NotFoundObjectResult(new {Message = $"Chat with id {id} not found"});
@@ -60,6 +60,5 @@ public class ChatService
         var result = _dbContext.UserChats.Add(new User_chats { Id_user = userId, Id_chat = chat.Id });
         await _dbContext.SaveChangesAsync();
         return new CreatedResult($"/chats/{chat.Id}", result);
-        
     }
 }

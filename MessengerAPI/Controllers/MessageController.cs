@@ -16,7 +16,7 @@ public class MessageController : BaseController
         _messageService = messageService;
     }
 
-    
+    [HttpPost]
     public async Task<IActionResult> CreateMessage(MessageDto messageDto)
     {
         var userId = GetUserId();
@@ -24,6 +24,7 @@ public class MessageController : BaseController
         return result;
     }
 
+    [HttpGet("{chatId}")]
     public async Task<IActionResult> GetMessages(int chatId)
     {
         var result = await _messageService.GetMessages(chatId);
