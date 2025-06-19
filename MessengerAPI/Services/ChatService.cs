@@ -1,5 +1,6 @@
 using MessengerAPI.Dto;
 using MessengerAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -59,5 +60,52 @@ public class ChatService
         _dbContext.UserChats.Add(newUserChat);
         await _dbContext.SaveChangesAsync();
         return newUserChat;
+    }
+
+    public async Task<List<Chat>> GetChatsByUser(int userId)
+    {
+        var userCharts = _dbContext.UserChats.Where(uc => uc.Id_user == userId);
+
+        List<Chat> chat = [];
+
+        foreach (var user in userCharts)
+        {
+            chat.AddRange(_dbContext.Chats.Where(uc => user.Id_chat == uc.Id && uc.Id_type_chat == 2));
+        }
+        return await Task.FromResult(chat);
+    }
+
+    public async Task<IActionResult> CreatePersonalChat(CreatePersonalChatDto createPersonalChatDto, int userId)
+    {
+        var chat = new Chat
+        {
+            Chat_name = createPersonalChatDto.Chat_name,
+            Id_type_chat = 1,
+            Create_date = DateTime.UtcNow,
+            InvitationGuid = Guid.NewGuid() // Генерация уникальной ссылки на чат
+        };
+
+        _dbContext.Chats.Add(chat);
+        await _dbContext.SaveChangesAsync();
+
+        var user_chat = new User_chats
+        {
+            Id_user = createPersonalChatDto.User_id,
+            Id_chat = chat.Id
+        };
+
+        _dbContext.UserChats.Add(user_chat);
+        await _dbContext.SaveChangesAsync();
+
+        var my_chat = new User_chats
+        {
+            Id_user = userId,
+            Id_chat = chat.Id
+        };
+
+        _dbContext.UserChats.Add(my_chat);
+        await _dbContext.SaveChangesAsync();
+
+        return new CreatedResult($"chat/{chat.Id}", chat);
     }
 }

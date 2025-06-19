@@ -74,4 +74,33 @@ public class ChatController : BaseController
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpGet("chats")]
+    public async Task<IActionResult> GetChat()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userIdClaim != null)
+        {
+            var result = await _chatService.GetChatsByUser(int.Parse(userIdClaim));
+
+            if (result == null || result.Count == 0)
+                return new NotFoundObjectResult(new { Message = "The user does not have chats" });
+            return Ok(result);
+        }
+        return BadRequest();
+    }
+
+    [HttpPost("personal")]
+    public async Task<IActionResult> CreatePersonalChat([FromBody] CreatePersonalChatDto createPersonalChatDto)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userIdClaim != null)
+        {
+            var userId = int.Parse(userIdClaim);
+
+            var result = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
+            return result;
+        }
+        return BadRequest();
+    }
 }
