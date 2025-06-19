@@ -1,7 +1,8 @@
 using MessengerAPI.Dto;
 using MessengerAPI.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MessengerAPI.Services;
 
@@ -14,7 +15,7 @@ public class MessageService
         _dbContext = dbContext;
     }
 
-    public async Task<IActionResult> CreateMessage(MessageDto messageDto, int userId)
+    public async Task<Message> CreateMessage(MessageDto messageDto, int userId)
     {
         var message = new Message
         {
@@ -26,14 +27,13 @@ public class MessageService
         
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync();
-        return new CreatedResult($"/chats/{message.Id}", message);
+        return message;
     }
 
-    public async Task<IActionResult> GetMessages(int chatId)
+    public async Task<List<Message>> GetMessages(int chatId)
     {
-        var messages = await _dbContext.Messages
+        return await _dbContext.Messages
             .Where(m => m.Id_chat == chatId)
             .ToListAsync();
-        return new CreatedResult($"/chats/{chatId}", messages);
     }
 }

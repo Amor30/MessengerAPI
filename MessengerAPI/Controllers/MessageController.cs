@@ -7,6 +7,7 @@ namespace MessengerAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class MessageController : BaseController
 {
     private readonly MessageService _messageService;
@@ -17,17 +18,31 @@ public class MessageController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateMessage(MessageDto messageDto)
+    public async Task<IActionResult> CreateMessage([FromBody] MessageDto messageDto)
     {
-        var userId = GetUserId();
-        var result = await _messageService.CreateMessage(messageDto, userId);
-        return result;
+        try
+        {
+            var userId = GetUserId();
+            var message = await _messageService.CreateMessage(messageDto, userId);
+            return CreatedAtAction(nameof(CreateMessage), new { id = message.Id }, message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpGet("{chatId}")]
     public async Task<IActionResult> GetMessages(int chatId)
     {
-        var result = await _messageService.GetMessages(chatId);
-        return result;
+        try
+        {
+            var messages = await _messageService.GetMessages(chatId);
+            return Ok(messages);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }

@@ -1,9 +1,7 @@
-using Azure.Core;
 using MessengerAPI.Dto;
 using MessengerAPI.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace MessengerAPI.Services;
 
@@ -16,49 +14,50 @@ public class ChatService
         _dbContext = dbContext;
     }
 
-    public async Task<IActionResult> CreateChat(CreateChatDto createChatDto)
+    public async Task<Chat> CreateChat(CreateChatDto createChatDto)
     {
         var chat = new Chat
         {
             Chat_name = createChatDto.Chat_name,
             Id_type_chat = createChatDto.Id_type_chat,
             Create_date = DateTime.UtcNow,
-            InvitationGuid = Guid.NewGuid() // Генерация уникальной ссылки на чат
+            InvitationGuid = Guid.NewGuid()
         };
         
         _dbContext.Chats.Add(chat);
         await _dbContext.SaveChangesAsync();
-        return new CreatedResult($"chat/{chat.Id}", chat);
+        return chat;
     }
 
-    public async Task<IActionResult> GetInvitationLink(int id, string baseUrl)
+    public async Task<string> GetInvitationLink(int id, string baseUrl)
     {
         var chat = await _dbContext.Chats.FirstOrDefaultAsync(x => x.Id == id);
         if (chat == null)
         {
-            return new NotFoundObjectResult(new {Message = $"Chat with id {id} not found"});
+            throw new InvalidOperationException($"Chat with id {id} not found");
         }
         
-        var link  =$"{baseUrl.TrimEnd('/')}/join?guid={chat.InvitationGuid}";
-        
-        return new CreatedResult($"chat/{id}/{link}", link);
+        return $"{baseUrl.TrimEnd('/')}/join?guid={chat.InvitationGuid}";
     }
 
-    public async Task<IActionResult> JoinChatByLink(Guid guid, int userId)
+    public async Task<User_chats> JoinChatByLink(Guid guid, int userId)
     {
-        var chat = await _dbContext.Chats.FirstOrDefaultAsync();
+        var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.InvitationGuid == guid);
         if (chat == null)
         {
-            return new NotFoundObjectResult(new {Message = "Invalid invitation link"});
+            throw new InvalidOperationException("Invalid invitation link");
         }
-        
+
         var userChat = await _dbContext.UserChats
             .FirstOrDefaultAsync(u => u.Id_user == userId && u.Id_chat == chat.Id);
-        if (userChat == null)
-         return new BadRequestObjectResult(new {Message = "User is already in chat"});
-        
-        var result = _dbContext.UserChats.Add(new User_chats { Id_user = userId, Id_chat = chat.Id });
+        if (userChat != null)
+        {
+            throw new InvalidOperationException("User is already in chat");
+        }
+
+        var newUserChat = new User_chats { Id_user = userId, Id_chat = chat.Id };
+        _dbContext.UserChats.Add(newUserChat);
         await _dbContext.SaveChangesAsync();
-        return new CreatedResult($"/chats/{chat.Id}", result);
+        return newUserChat;
     }
 }
