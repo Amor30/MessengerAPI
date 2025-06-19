@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
 namespace MessengerAPI.Models;
-
+[Table("tb_user")]
 public class ApplicationUser : IdentityUser<int>
 {
     [Required]

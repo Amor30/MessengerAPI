@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MessengerAPI.Models;
 
+[Table("tb_message")]
 public class Message
 {
     [Key]
