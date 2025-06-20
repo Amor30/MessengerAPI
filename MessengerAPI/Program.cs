@@ -3,6 +3,7 @@ using MessengerAPI.Models;
 using MessengerAPI.Services;
 using Microsoft.AspNetCore.Identity;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -38,5 +39,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+ 
+using (var scope = app.Services.CreateScope())
+{
+    var service = scope.ServiceProvider;
+    var db = service.GetRequiredService<ApplicationDbContext>();
+    var userManager = service.GetRequiredService<UserManager<ApplicationUser>>();
+    await db.Database.MigrateAsync();
+    await SeedData.Initialize(service);
+}
 
-app.Run();
+ app.Run();
