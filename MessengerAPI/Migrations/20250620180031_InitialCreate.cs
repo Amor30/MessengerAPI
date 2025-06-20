@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MessengerAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateDatabase : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,14 +32,14 @@ namespace MessengerAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Create_date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    user_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    create_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    token = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -55,16 +55,16 @@ namespace MessengerAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TypeChats",
+                name: "tb_type_chat",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name_type = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
+                    name_type = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TypeChats", x => x.Id);
+                    table.PrimaryKey("PK_tb_type_chat", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -174,76 +174,77 @@ namespace MessengerAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Chats",
+                name: "tb_chat",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Chat_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Create_date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Id_type_chat = table.Column<int>(type: "int", nullable: false)
+                    chat_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    create_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    id_type_chat = table.Column<int>(type: "int", nullable: false),
+                    guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Chats", x => x.Id);
+                    table.PrimaryKey("PK_tb_chat", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Chats_TypeChats_Id_type_chat",
-                        column: x => x.Id_type_chat,
-                        principalTable: "TypeChats",
-                        principalColumn: "Id",
+                        name: "FK_tb_chat_tb_type_chat_id_type_chat",
+                        column: x => x.id_type_chat,
+                        principalTable: "tb_type_chat",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Messages",
+                name: "tb_message",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Msg_text = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Create_date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Id_user = table.Column<int>(type: "int", nullable: false),
-                    Id_chat = table.Column<int>(type: "int", nullable: false),
-                    User_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    create_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    id_user = table.Column<int>(type: "int", nullable: false),
+                    id_chat = table.Column<int>(type: "int", nullable: false),
+                    user_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.PrimaryKey("PK_tb_message", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Messages_AspNetUsers_Id_user",
-                        column: x => x.Id_user,
+                        name: "FK_tb_message_AspNetUsers_id_user",
+                        column: x => x.id_user,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Messages_Chats_Id_chat",
-                        column: x => x.Id_chat,
-                        principalTable: "Chats",
-                        principalColumn: "Id",
+                        name: "FK_tb_message_tb_chat_id_chat",
+                        column: x => x.id_chat,
+                        principalTable: "tb_chat",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserChats",
+                name: "tb_user_chat",
                 columns: table => new
                 {
-                    Id_user = table.Column<int>(type: "int", nullable: false),
-                    Id_chat = table.Column<int>(type: "int", nullable: false)
+                    id_user = table.Column<int>(type: "int", nullable: false),
+                    id_chat = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserChats", x => new { x.Id_user, x.Id_chat });
+                    table.PrimaryKey("PK_tb_user_chat", x => new { x.id_user, x.id_chat });
                     table.ForeignKey(
-                        name: "FK_UserChats_AspNetUsers_Id_user",
-                        column: x => x.Id_user,
+                        name: "FK_tb_user_chat_AspNetUsers_id_user",
+                        column: x => x.id_user,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserChats_Chats_Id_chat",
-                        column: x => x.Id_chat,
-                        principalTable: "Chats",
-                        principalColumn: "Id",
+                        name: "FK_tb_user_chat_tb_chat_id_chat",
+                        column: x => x.id_chat,
+                        principalTable: "tb_chat",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -280,11 +281,11 @@ namespace MessengerAPI.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_Email",
+                name: "IX_AspNetUsers_email",
                 table: "AspNetUsers",
-                column: "Email",
+                column: "email",
                 unique: true,
-                filter: "[Email] IS NOT NULL");
+                filter: "[email] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -294,24 +295,24 @@ namespace MessengerAPI.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Chats_Id_type_chat",
-                table: "Chats",
-                column: "Id_type_chat");
+                name: "IX_tb_chat_id_type_chat",
+                table: "tb_chat",
+                column: "id_type_chat");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_Id_chat",
-                table: "Messages",
-                column: "Id_chat");
+                name: "IX_tb_message_id_chat",
+                table: "tb_message",
+                column: "id_chat");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_Id_user",
-                table: "Messages",
-                column: "Id_user");
+                name: "IX_tb_message_id_user",
+                table: "tb_message",
+                column: "id_user");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserChats_Id_chat",
-                table: "UserChats",
-                column: "Id_chat");
+                name: "IX_tb_user_chat_id_chat",
+                table: "tb_user_chat",
+                column: "id_chat");
         }
 
         /// <inheritdoc />
@@ -333,10 +334,10 @@ namespace MessengerAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Messages");
+                name: "tb_message");
 
             migrationBuilder.DropTable(
-                name: "UserChats");
+                name: "tb_user_chat");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -345,10 +346,10 @@ namespace MessengerAPI.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Chats");
+                name: "tb_chat");
 
             migrationBuilder.DropTable(
-                name: "TypeChats");
+                name: "tb_type_chat");
         }
     }
 }
