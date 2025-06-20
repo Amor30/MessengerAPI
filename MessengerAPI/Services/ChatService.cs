@@ -86,12 +86,12 @@ public class ChatService
     /// <param name="createPersonalChatDto">¬ходные данные</param>
     /// <param name="userId">Id пользовател€</param>
     /// <returns></returns>
-    public async Task<IActionResult> CreatePersonalChat(CreatePersonalChatDto createPersonalChatDto, int userId)
+    public async Task<Chat?> CreatePersonalChat(CreatePersonalChatDto createPersonalChatDto, int userId)
     {
         var existingChat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Chat_name == createPersonalChatDto.Chat_name);
         if (existingChat != null)
         {
-            return (IActionResult)existingChat;
+            return existingChat;
         }
         else
         {
@@ -124,7 +124,7 @@ public class ChatService
             _dbContext.UserChats.Add(my_chat);
             await _dbContext.SaveChangesAsync();
 
-            return new CreatedResult($"chat/{chat.Id}", chat);
+            return chat;
         }
     }
 
@@ -134,7 +134,7 @@ public class ChatService
     /// <param name="addUserInChatDto">¬ходные данные</param>
     /// <returns></returns>
     /// 
-    public async Task<IActionResult> AddUserInChat(AddUserInChatDto addUserInChatDto)
+    public async Task<bool> AddUserInChat(AddUserInChatDto addUserInChatDto)
     {
         var existingChat = await _dbContext.UserChats.FirstOrDefaultAsync(c => c.Id_user == addUserInChatDto.id_user && c.Id_chat == addUserInChatDto.id_chat);
         if (existingChat == null)
@@ -147,12 +147,11 @@ public class ChatService
 
             _dbContext.UserChats.Add(User_chat);
             await _dbContext.SaveChangesAsync();
-
-            return new CreatedResult();
+            return true;
         }
         else
         {
-            return (IActionResult)existingChat;
+            return false;
         }
     }
 }

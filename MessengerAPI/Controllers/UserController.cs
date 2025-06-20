@@ -67,6 +67,10 @@ public class UsersController : BaseController
         try
         {
             var result = await _userService.GetListUser(idChat);
+            if (result == null || result.Count == 0)
+            {
+                return NotFound("В чате еще нет участников");
+            }
             var userDtos = MapToUserDtos(result);
             return Ok(userDtos);
         }

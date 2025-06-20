@@ -3,6 +3,7 @@ using MessengerAPI.Models;
 using MessengerAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Security.Claims;
 
 namespace MessengerAPI.Controllers;
@@ -88,6 +89,8 @@ public class ChatController : BaseController
         {
             var userId = GetUserId();
             var result = await _chatService.GetChatsByUser(userId);
+            if (result == null)
+                return BadRequest("У пользователя нет групповых чатов");
             return Ok(result);
         }
         catch (InvalidOperationException ex)
@@ -101,7 +104,7 @@ public class ChatController : BaseController
     }
 
     /// <summary>
-    /// Создание личного чата
+    /// Создание или открытие личного чата
     /// </summary>
     /// <param name="idChat">Id чата</param>
     /// <returns>Данные созданного чата</returns>
@@ -113,6 +116,10 @@ public class ChatController : BaseController
         {
             var userId = GetUserId();
             var result = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
+            if (result == null)
+            {
+                return StatusCode(500, "Не удалось создать чат.");
+            }
             return Ok(result);
         }
         catch (InvalidOperationException ex)
@@ -136,8 +143,16 @@ public class ChatController : BaseController
     {
         try
         {
-            var result = await _chatService.AddUserInChat(addUserInChatDto);
-            return Ok("User has been successfully added to the group chat");
+            bool result = await _chatService.AddUserInChat(addUserInChatDto);
+
+            if (result)
+            {
+                return Ok("User has been successfully added to the group chat");
+            }
+            else 
+            {
+                return Conflict("User is already in the group chat.");
+            }
         }
         catch (InvalidOperationException ex)
         {
