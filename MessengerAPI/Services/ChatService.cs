@@ -81,7 +81,7 @@ public class ChatService
     }
 
     /// <summary>
-    /// —оздание личного чата
+    /// —оздание или открытие личного чата
     /// </summary>
     /// <param name="createPersonalChatDto">¬ходные данные</param>
     /// <param name="userId">Id пользовател€</param>
@@ -133,6 +133,7 @@ public class ChatService
     /// </summary>
     /// <param name="addUserInChatDto">¬ходные данные</param>
     /// <returns></returns>
+    /// 
     public async Task<IActionResult> AddUserInChat(AddUserInChatDto addUserInChatDto)
     {
         var existingChat = await _dbContext.UserChats.FirstOrDefaultAsync(c => c.Id_user == addUserInChatDto.id_user && c.Id_chat == addUserInChatDto.id_chat);

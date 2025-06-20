@@ -1,5 +1,6 @@
 using MessengerAPI.Controllers;
 using MessengerAPI.Dto;
+using MessengerAPI.Models;
 using MessengerAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,13 +55,20 @@ public class UsersController : BaseController
         }
     }
 
+    /// <summary>
+    /// Получение списка участников группового чата
+    /// </summary>
+    /// <param name="idChat">Id чата</param>
+    /// <returns>Список участников чата</returns>
+
     [HttpGet("user_list")]
-    public async Task<IActionResult> GetListUser(int idChat)
+    public async Task<IActionResult> GetListUser([FromQuery] int idChat)
     {
         try
         {
             var result = await _userService.GetListUser(idChat);
-            return Ok(result);
+            var userDtos = MapToUserDtos(result);
+            return Ok(userDtos);
         }
         catch (InvalidOperationException ex)
         {
@@ -70,5 +78,48 @@ public class UsersController : BaseController
         {
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Список всех пользователей
+    /// </summary>
+    /// <param name="idChat"></param>
+    /// <returns>список пользователей</returns>
+
+    [HttpGet("all_user")]
+    public async Task<IActionResult> GetAllUser()
+    {
+        try
+        {
+            var result = await _userService.GetAllUser();
+            if (result == null || result.Count == 0)
+            {
+                return NotFound("Список пользователей пуст.");
+            }
+            var userDtos = MapToUserDtos(result);
+            return Ok(userDtos);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    private List<ListUsersDto> MapToUserDtos(List<ApplicationUser> users)
+    {
+        var userDtos = new List<ListUsersDto>();
+        foreach (var user in users)
+        {
+            userDtos.Add(new ListUsersDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+            });
+        }
+        return userDtos;
     }
 }

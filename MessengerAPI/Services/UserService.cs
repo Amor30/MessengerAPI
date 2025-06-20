@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore
 
 namespace MessengerAPI.Services;
 
@@ -78,8 +79,8 @@ public class UserService
     /// ѕолучение списка пользователей чата
     /// </summary>
     /// <param name="idChat">ID чата</param>
-    /// <returns></returns>
-    /// 
+    /// <returns>—писок участников чата</returns>
+
     public async Task<List<ApplicationUser>> GetListUser(int idChat)
     {
         var userChats = _dbContext.UserChats.Where(u => u.Id_chat == idChat);
@@ -91,5 +92,17 @@ public class UserService
             user.AddRange(_dbContext.Users.Where(u => us.Id_chat == u.Id));
         }
         return await Task.FromResult(user);
+    }
+
+    /// <summary>
+    /// ѕолучение всех пользователей
+    /// </summary>
+    /// <returns>список пользователей</returns>
+
+    public async Task<List<ApplicationUser>> GetAllUser()
+    {
+        var users = await _dbContext.Users.ToListAsync();
+
+        return users;
     }
 }

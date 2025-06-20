@@ -79,6 +79,7 @@ public class ChatController : BaseController
     /// <summary>
     /// Получение списка групповых чатов
     /// </summary>
+    /// <returns>Список групповых чатов у пользователя</returns>
 
     [HttpGet("chats")]
     public async Task<IActionResult> GetChat()
@@ -102,6 +103,8 @@ public class ChatController : BaseController
     /// <summary>
     /// Создание личного чата
     /// </summary>
+    /// <param name="idChat">Id чата</param>
+    /// <returns>Данные созданного чата</returns>
 
     [HttpPost("personal")]
     public async Task<IActionResult> CreatePersonalChat([FromBody] CreatePersonalChatDto createPersonalChatDto)
@@ -121,9 +124,12 @@ public class ChatController : BaseController
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
     /// <summary>
     /// Добавление пользователя в групповой чат
     /// </summary>
+    /// <param name="addUserInChatDto">Входные данные</param>
+    /// <returns>IActionResult</returns>
 
     [HttpPost("add_user")]
     public async Task<IActionResult> AddUserInChat([FromBody] AddUserInChatDto addUserInChatDto)
@@ -131,7 +137,7 @@ public class ChatController : BaseController
         try
         {
             var result = await _chatService.AddUserInChat(addUserInChatDto);
-            return Ok();
+            return Ok("User has been successfully added to the group chat");
         }
         catch (InvalidOperationException ex)
         {
