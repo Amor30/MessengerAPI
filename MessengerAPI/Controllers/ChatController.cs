@@ -1,8 +1,9 @@
-using System.Security.Claims;
 using MessengerAPI.Dto;
+using MessengerAPI.Models;
 using MessengerAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MessengerAPI.Controllers;
 
@@ -75,32 +76,70 @@ public class ChatController : BaseController
         }
     }
 
+    /// <summary>
+    /// Получение списка групповых чатов
+    /// </summary>
+
     [HttpGet("chats")]
     public async Task<IActionResult> GetChat()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userIdClaim != null)
+        try
         {
-            var result = await _chatService.GetChatsByUser(int.Parse(userIdClaim));
-
-            if (result == null || result.Count == 0)
-                return new NotFoundObjectResult(new { Message = "The user does not have chats" });
+            var userId = GetUserId();
+            var result = await _chatService.GetChatsByUser(userId);
             return Ok(result);
         }
-        return BadRequest();
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
+
+    /// <summary>
+    /// Создание личного чата
+    /// </summary>
 
     [HttpPost("personal")]
     public async Task<IActionResult> CreatePersonalChat([FromBody] CreatePersonalChatDto createPersonalChatDto)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userIdClaim != null)
+        try
         {
-            var userId = int.Parse(userIdClaim);
-
+            var userId = GetUserId();
             var result = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
-            return result;
+            return Ok(result);
         }
-        return BadRequest();
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+    /// <summary>
+    /// Добавление пользователя в групповой чат
+    /// </summary>
+
+    [HttpPost("add_user")]
+    public async Task<IActionResult> AddUserInChat([FromBody] AddUserInChatDto addUserInChatDto)
+    {
+        try
+        {
+            var result = await _chatService.AddUserInChat(addUserInChatDto);
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }

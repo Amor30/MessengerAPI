@@ -53,4 +53,22 @@ public class UsersController : BaseController
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpGet("user_list")]
+    public async Task<IActionResult> GetListUser(int idChat)
+    {
+        try
+        {
+            var result = await _userService.GetListUser(idChat);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 }

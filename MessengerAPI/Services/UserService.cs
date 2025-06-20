@@ -73,4 +73,23 @@ public class UserService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    /// <summary>
+    /// ѕолучение списка пользователей чата
+    /// </summary>
+    /// <param name="idChat">ID чата</param>
+    /// <returns></returns>
+    /// 
+    public async Task<List<ApplicationUser>> GetListUser(int idChat)
+    {
+        var userChats = _dbContext.UserChats.Where(u => u.Id_chat == idChat);
+
+        List<ApplicationUser> user = [];
+
+        foreach (var us in userChats)
+        {
+            user.AddRange(_dbContext.Users.Where(u => us.Id_chat == u.Id));
+        }
+        return await Task.FromResult(user);
+    }
 }

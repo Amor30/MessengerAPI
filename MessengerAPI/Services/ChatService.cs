@@ -62,6 +62,11 @@ public class ChatService
         return newUserChat;
     }
 
+    /// <summary>
+    /// Получение списка групповых чатов
+    /// </summary>
+    /// <param name="userId">Id пользователя</param>
+    /// <returns></returns>
     public async Task<List<Chat>> GetChatsByUser(int userId)
     {
         var userCharts = _dbContext.UserChats.Where(uc => uc.Id_user == userId);
@@ -75,37 +80,78 @@ public class ChatService
         return await Task.FromResult(chat);
     }
 
+    /// <summary>
+    /// Создание личного чата
+    /// </summary>
+    /// <param name="createPersonalChatDto">Входные данные</param>
+    /// <param name="userId">Id пользователя</param>
+    /// <returns></returns>
     public async Task<IActionResult> CreatePersonalChat(CreatePersonalChatDto createPersonalChatDto, int userId)
     {
-        var chat = new Chat
+        var existingChat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Chat_name == createPersonalChatDto.Chat_name);
+        if (existingChat != null)
         {
-            Chat_name = createPersonalChatDto.Chat_name,
-            Id_type_chat = 1,
-            Create_date = DateTime.UtcNow,
-            InvitationGuid = Guid.NewGuid() // Генерация уникальной ссылки на чат
-        };
-
-        _dbContext.Chats.Add(chat);
-        await _dbContext.SaveChangesAsync();
-
-        var user_chat = new User_chats
+            return (IActionResult)existingChat;
+        }
+        else
         {
-            Id_user = createPersonalChatDto.User_id,
-            Id_chat = chat.Id
-        };
+            var chat = new Chat
+            {
+                Chat_name = createPersonalChatDto.Chat_name,
+                Id_type_chat = 1,
+                Create_date = DateTime.UtcNow,
+                InvitationGuid = Guid.NewGuid() // Генерация уникальной ссылки на чат
+            };
 
-        _dbContext.UserChats.Add(user_chat);
-        await _dbContext.SaveChangesAsync();
+            _dbContext.Chats.Add(chat);
+            await _dbContext.SaveChangesAsync();
 
-        var my_chat = new User_chats
+            var user_chat = new User_chats
+            {
+                Id_user = createPersonalChatDto.User_id,
+                Id_chat = chat.Id
+            };
+
+            _dbContext.UserChats.Add(user_chat);
+            await _dbContext.SaveChangesAsync();
+
+            var my_chat = new User_chats
+            {
+                Id_user = userId,
+                Id_chat = chat.Id
+            };
+
+            _dbContext.UserChats.Add(my_chat);
+            await _dbContext.SaveChangesAsync();
+
+            return new CreatedResult($"chat/{chat.Id}", chat);
+        }
+    }
+
+    /// <summary>
+    /// Добавление пользователя в групповой чат
+    /// </summary>
+    /// <param name="addUserInChatDto">Входные данные</param>
+    /// <returns></returns>
+    public async Task<IActionResult> AddUserInChat(AddUserInChatDto addUserInChatDto)
+    {
+        var existingChat = await _dbContext.UserChats.FirstOrDefaultAsync(c => c.Id_user == addUserInChatDto.id_user && c.Id_chat == addUserInChatDto.id_chat);
+        if (existingChat == null)
         {
-            Id_user = userId,
-            Id_chat = chat.Id
-        };
+            var User_chat = new User_chats
+            {
+                Id_chat = addUserInChatDto.id_chat,
+                Id_user = addUserInChatDto.id_user
+            };
 
-        _dbContext.UserChats.Add(my_chat);
-        await _dbContext.SaveChangesAsync();
+            _dbContext.UserChats.Add(User_chat);
+            await _dbContext.SaveChangesAsync();
 
-        return new CreatedResult($"chat/{chat.Id}", chat);
+            return new CreatedResult();
+        }
+        else
+        {
+            return (IActionResult)existingChat;
+        }
     }
 }
