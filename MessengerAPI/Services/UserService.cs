@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore
+using Microsoft.EntityFrameworkCore;
 
 namespace MessengerAPI.Services;
 
