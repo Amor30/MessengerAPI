@@ -6,6 +6,7 @@ namespace MessengerAPI.Models;
 public class Type_chat
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     [Column("id")]
     public int Id { get; set; }
 
