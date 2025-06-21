@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController : BaseController
+public class UsersController : ControllerBase
 {
     private readonly UserService _userService;
 
@@ -37,23 +37,23 @@ public class UsersController : BaseController
         }
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+[HttpPost("login")]
+public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+{
+    try
     {
-        try
-        {
-            var token = await _userService.Login(loginDto);
-            return Ok(new { Token = token });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+        var user = await _userService.Authenticate(loginDto);
+        return Ok(new { UserId = user.Id, UserName = user.UserName });
     }
+    catch (UnauthorizedAccessException ex)
+    {
+        return Unauthorized(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+}
     
 
     [HttpGet("user_list")]

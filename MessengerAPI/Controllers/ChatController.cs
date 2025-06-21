@@ -10,7 +10,7 @@ namespace MessengerAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ChatController : BaseController
+public class ChatController : ControllerBase
 {
     private readonly ChatService _chatService;
 
@@ -24,7 +24,12 @@ public class ChatController : BaseController
     {
         try
         {
-            var userId = GetUserId();
+            var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrEmpty(userIdHeader) || !int.TryParse(userIdHeader, out var userId))
+            {
+                return Unauthorized("Invalid or missing UserId in header.");
+            }
+
             var chat = await _chatService.CreateGroupChat(createChatDto, userId);
             var chatDto = new ChatDto
             {
@@ -71,7 +76,12 @@ public class ChatController : BaseController
                 return BadRequest("Invalid chat link.");
             }
 
-            var userId = GetUserId();
+            var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrEmpty(userIdHeader) || !int.TryParse(userIdHeader, out var userId))
+            {
+                return Unauthorized("Invalid or missing UserId in header.");
+            }
+
             var result = await _chatService.JoinChatByLink(guid, userId);
             return CreatedAtAction(nameof(JoinChat), new { chatId = result.Id_chat }, result);
         }
@@ -90,26 +100,31 @@ public class ChatController : BaseController
     /// </summary>
     /// <returns>������ ��������� ����� � ������������</returns>
 
-    [HttpGet("chats")]
-    public async Task<IActionResult> GetChat()
+[HttpGet("chats")]
+public async Task<IActionResult> GetChat()
+{
+    try
     {
-        try
+        var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+        if (string.IsNullOrEmpty(userIdHeader) || !int.TryParse(userIdHeader, out var userId))
         {
-            var userId = GetUserId();
-            var result = await _chatService.GetChatsByUser(userId);
-            if (result == null)
-                return BadRequest("� ������������ ��� ��������� �����");
-            return Ok(result);
+            return Unauthorized("Invalid or missing UserId in header.");
         }
-        catch (InvalidOperationException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+
+        var result = await _chatService.GetChatsByUser(userId);
+        if (result == null)
+            return BadRequest("У пользователя нет доступных чатов");
+        return Ok(result);
     }
+    catch (InvalidOperationException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+}
 
     /// <summary>
     /// �������� ��� �������� ������� ����
@@ -122,11 +137,16 @@ public class ChatController : BaseController
     {
         try
         {
-            var userId = GetUserId();
+            var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrEmpty(userIdHeader) || !int.TryParse(userIdHeader, out var userId))
+            {
+                return Unauthorized("Invalid or missing UserId in header.");
+            }
+
             var result = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
             if (result == null)
             {
-                return StatusCode(500, "�� ������� ������� ���.");
+                return StatusCode(500, "Не удалось создать чат.");
             }
             return Ok(result);
         }

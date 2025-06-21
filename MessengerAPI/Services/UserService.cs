@@ -48,36 +48,13 @@ public class UserService
         return user;
     }
 
-    public async Task<string> Login(LoginDto loginDto)
+    public async Task<ApplicationUser> Authenticate(LoginDto loginDto)
     {
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
             throw new UnauthorizedAccessException("Invalid email or password.");
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Email)
-        };
-
-        var jwtSettings = _configuration.GetSection("Jwt");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: jwtSettings["Issuer"],
-            audience: jwtSettings["Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: creds
-        );
-
-        string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-        
-        user.Token = tokenString;
-        await _userManager.UpdateAsync(user);
-
-        return tokenString;
+        return user;
     }
 
     /// <summary>

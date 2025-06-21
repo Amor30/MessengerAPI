@@ -7,7 +7,7 @@ namespace MessengerAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MessageController : BaseController
+public class MessageController : ControllerBase
 {
     private readonly MessageService _messageService;
 
@@ -21,7 +21,12 @@ public class MessageController : BaseController
     {
         try
         {
-            var userId = GetUserId();
+            var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrEmpty(userIdHeader) || !int.TryParse(userIdHeader, out var userId))
+            {
+                return Unauthorized("Invalid or missing UserId in header.");
+            }
+            
             var message = await _messageService.CreateMessage(messageDto, userId);
             return CreatedAtAction(nameof(CreateMessage), new { id = message.Id }, message);
         }
