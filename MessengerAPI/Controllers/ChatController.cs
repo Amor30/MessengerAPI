@@ -85,11 +85,6 @@ public class ChatController : BaseController
         }
     }
 
-    /// <summary>
-    /// ��������� ������ ��������� �����
-    /// </summary>
-    /// <returns>������ ��������� ����� � ������������</returns>
-
     [HttpGet("chats")]
     public async Task<IActionResult> GetChat()
     {
@@ -111,24 +106,22 @@ public class ChatController : BaseController
         }
     }
 
-    /// <summary>
-    /// �������� ��� �������� ������� ����
-    /// </summary>
-    /// <param name="idChat">Id ����</param>
-    /// <returns>������ ���������� ����</returns>
-
     [HttpPost("personal")]
     public async Task<IActionResult> CreatePersonalChat([FromBody] CreatePersonalChatDto createPersonalChatDto)
     {
         try
         {
             var userId = GetUserId();
-            var result = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
-            if (result == null)
+            var chat = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
+            var chatDto = new ChatDto
             {
-                return StatusCode(500, "�� ������� ������� ���.");
-            }
-            return Ok(result);
+                Id = chat.Id,
+                Chat_name = chat.Chat_name,
+                Create_date = chat.Create_date,
+                Id_type_chat = chat.Id_type_chat,
+                InvitationGuid = chat.InvitationGuid
+            };
+            return CreatedAtAction(nameof(CreatePersonalChat), new { id = chat.Id }, chatDto);
         }
         catch (InvalidOperationException ex)
         {
@@ -139,12 +132,6 @@ public class ChatController : BaseController
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-
-    /// <summary>
-    /// ���������� ������������ � ��������� ���
-    /// </summary>
-    /// <param name="addUserInChatDto">������� ������</param>
-    /// <returns>IActionResult</returns>
 
     [HttpPost("add_user")]
     public async Task<IActionResult> AddUserInChat([FromBody] AddUserInChatDto addUserInChatDto)

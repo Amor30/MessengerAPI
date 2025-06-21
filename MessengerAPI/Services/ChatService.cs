@@ -73,15 +73,16 @@ public class ChatService
 
     public async Task<List<Chat>> GetChatsByUser(int userId)
     {
-        var userCharts = _dbContext.UserChats.Where(uc => uc.Id_user == userId);
+        var chats = await _dbContext.UserChats
+                .Where(uc => uc.Id_user == userId)
+                .Join(
+                    _dbContext.Chats.Where(c => c.Id_type_chat == 2),
+                    uc => uc.Id_chat,
+                    c => c.Id,
+                    (uc, c) => c) 
+                .ToListAsync();
 
-        List<Chat> chat = [];
-
-        foreach (var user in userCharts)
-        {
-            chat.AddRange(_dbContext.Chats.Where(uc => user.Id_chat == uc.Id && uc.Id_type_chat == 2));
-        }
-        return await Task.FromResult(chat);
+        return chats;
     }
 
     public async Task<Chat?> CreatePersonalChat(CreatePersonalChatDto createPersonalChatDto, int userId)
