@@ -26,9 +26,9 @@ namespace MessengerAPI.Services
         {
             var defoultTypeChat = new List<Type_chat>
             {
-                new Type_chat {Name_type = "Общий"},
-                new Type_chat {Name_type = "Групповой"},
-                new Type_chat {Name_type = "Личный"}
+                new Type_chat {Name_type = "Общий", Id = 1},
+                new Type_chat {Name_type = "Групповой", Id = 2},
+                new Type_chat {Name_type = "Личный", Id = 3}
             };
             await db.TypeChats.AddRangeAsync(defoultTypeChat);
             await db.SaveChangesAsync();
