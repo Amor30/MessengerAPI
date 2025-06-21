@@ -84,7 +84,7 @@ public class ChatService
 
         foreach (var user in userCharts)
         {
-            chat.AddRange(_dbContext.Chats.Where(uc => user.Id_chat == uc.Id && uc.Id_type_chat == 2));
+            chat.AddRange(_dbContext.Chats.Where(uc => user.Id_chat == uc.Id && uc.Id_type_chat == 5));
         }
         return await Task.FromResult(chat);
     }
@@ -107,7 +107,7 @@ public class ChatService
             var chat = new Chat
             {
                 Chat_name = createPersonalChatDto.Chat_name,
-                Id_type_chat = 1,
+                Id_type_chat = 6,
                 Create_date = DateTime.UtcNow,
                 InvitationGuid = Guid.NewGuid() // ��������� ���������� ������ �� ���
             };
