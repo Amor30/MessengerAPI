@@ -21,12 +21,12 @@ public class ChatController : BaseController
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> CreateChat([FromBody] CreateChatDto createChatDto)
+    public async Task<IActionResult> CreateGroupChat([FromBody] CreateChatDto createChatDto)
     {
         try
         {
-            var chat = await _chatService.CreateChat(createChatDto);
-            return CreatedAtAction(nameof(CreateChat), new { id = chat.Id }, chat);
+            var chat = await _chatService.CreateGroupChat(createChatDto);
+            return CreatedAtAction(nameof(CreateGroupChat), new { id = chat.Id }, chat);
         }
         catch (Exception ex)
         {
@@ -78,9 +78,9 @@ public class ChatController : BaseController
     }
 
     /// <summary>
-    /// Получение списка групповых чатов
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     /// </summary>
-    /// <returns>Список групповых чатов у пользователя</returns>
+    /// <returns>пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</returns>
 
     [HttpGet("chats")]
     public async Task<IActionResult> GetChat()
@@ -90,7 +90,7 @@ public class ChatController : BaseController
             var userId = GetUserId();
             var result = await _chatService.GetChatsByUser(userId);
             if (result == null)
-                return BadRequest("У пользователя нет групповых чатов");
+                return BadRequest("пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ");
             return Ok(result);
         }
         catch (InvalidOperationException ex)
@@ -104,10 +104,10 @@ public class ChatController : BaseController
     }
 
     /// <summary>
-    /// Создание или открытие личного чата
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     /// </summary>
-    /// <param name="idChat">Id чата</param>
-    /// <returns>Данные созданного чата</returns>
+    /// <param name="idChat">Id пїЅпїЅпїЅпїЅ</param>
+    /// <returns>пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ</returns>
 
     [HttpPost("personal")]
     public async Task<IActionResult> CreatePersonalChat([FromBody] CreatePersonalChatDto createPersonalChatDto)
@@ -118,7 +118,7 @@ public class ChatController : BaseController
             var result = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
             if (result == null)
             {
-                return StatusCode(500, "Не удалось создать чат.");
+                return StatusCode(500, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ.");
             }
             return Ok(result);
         }
@@ -133,9 +133,9 @@ public class ChatController : BaseController
     }
 
     /// <summary>
-    /// Добавление пользователя в групповой чат
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
     /// </summary>
-    /// <param name="addUserInChatDto">Входные данные</param>
+    /// <param name="addUserInChatDto">пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ</param>
     /// <returns>IActionResult</returns>
 
     [HttpPost("add_user")]

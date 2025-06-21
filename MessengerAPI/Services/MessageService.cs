@@ -22,7 +22,8 @@ public class MessageService
             Msg_text = messageDto.Message,
             Create_date = DateTime.UtcNow,
             Id_chat = messageDto.IdChat,
-            Id_user = userId
+            Id_user = userId,
+            User_name = messageDto.UserName
         };
         
         _dbContext.Messages.Add(message);

@@ -15,12 +15,12 @@ public class ChatService
         _dbContext = dbContext;
     }
 
-    public async Task<Chat> CreateChat(CreateChatDto createChatDto)
+    public async Task<Chat> CreateGroupChat(CreateChatDto createChatDto)
     {
         var chat = new Chat
         {
             Chat_name = createChatDto.Chat_name,
-            Id_type_chat = createChatDto.Id_type_chat,
+            Id_type_chat = 2,
             Create_date = DateTime.UtcNow,
             InvitationGuid = Guid.NewGuid()
         };
@@ -63,9 +63,9 @@ public class ChatService
     }
 
     /// <summary>
-    /// Получение списка групповых чатов
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     /// </summary>
-    /// <param name="userId">Id пользователя</param>
+    /// <param name="userId">Id пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</param>
     /// <returns></returns>
     public async Task<List<Chat>> GetChatsByUser(int userId)
     {
@@ -81,10 +81,10 @@ public class ChatService
     }
 
     /// <summary>
-    /// Создание или открытие личного чата
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     /// </summary>
-    /// <param name="createPersonalChatDto">Входные данные</param>
-    /// <param name="userId">Id пользователя</param>
+    /// <param name="createPersonalChatDto">пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ</param>
+    /// <param name="userId">Id пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</param>
     /// <returns></returns>
     public async Task<Chat?> CreatePersonalChat(CreatePersonalChatDto createPersonalChatDto, int userId)
     {
@@ -100,7 +100,7 @@ public class ChatService
                 Chat_name = createPersonalChatDto.Chat_name,
                 Id_type_chat = 1,
                 Create_date = DateTime.UtcNow,
-                InvitationGuid = Guid.NewGuid() // Генерация уникальной ссылки на чат
+                InvitationGuid = Guid.NewGuid() // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ
             };
 
             _dbContext.Chats.Add(chat);
@@ -129,9 +129,9 @@ public class ChatService
     }
 
     /// <summary>
-    /// Добавление пользователя в групповой чат
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
     /// </summary>
-    /// <param name="addUserInChatDto">Входные данные</param>
+    /// <param name="addUserInChatDto">пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ</param>
     /// <returns></returns>
     /// 
     public async Task<bool> AddUserInChat(AddUserInChatDto addUserInChatDto)
