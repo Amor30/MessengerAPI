@@ -71,11 +71,6 @@ public class ChatService
         return newUserChat;
     }
 
-    /// <summary>
-    /// ��������� ������ ��������� �����
-    /// </summary>
-    /// <param name="userId">Id ������������</param>
-    /// <returns></returns>
     public async Task<List<Chat>> GetChatsByUser(int userId)
     {
         var userCharts = _dbContext.UserChats.Where(uc => uc.Id_user == userId);
@@ -84,17 +79,11 @@ public class ChatService
 
         foreach (var user in userCharts)
         {
-            chat.AddRange(_dbContext.Chats.Where(uc => user.Id_chat == uc.Id && uc.Id_type_chat == 5));
+            chat.AddRange(_dbContext.Chats.Where(uc => user.Id_chat == uc.Id && uc.Id_type_chat == 2));
         }
         return await Task.FromResult(chat);
     }
 
-    /// <summary>
-    /// �������� ��� �������� ������� ����
-    /// </summary>
-    /// <param name="createPersonalChatDto">������� ������</param>
-    /// <param name="userId">Id ������������</param>
-    /// <returns></returns>
     public async Task<Chat?> CreatePersonalChat(CreatePersonalChatDto createPersonalChatDto, int userId)
     {
         var existingChat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Chat_name == createPersonalChatDto.Chat_name);
@@ -107,9 +96,9 @@ public class ChatService
             var chat = new Chat
             {
                 Chat_name = createPersonalChatDto.Chat_name,
-                Id_type_chat = 6,
+                Id_type_chat = 3,
                 Create_date = DateTime.UtcNow,
-                InvitationGuid = Guid.NewGuid() // ��������� ���������� ������ �� ���
+                InvitationGuid = Guid.NewGuid()
             };
 
             _dbContext.Chats.Add(chat);
@@ -137,12 +126,6 @@ public class ChatService
         }
     }
 
-    /// <summary>
-    /// ���������� ������������ � ��������� ���
-    /// </summary>
-    /// <param name="addUserInChatDto">������� ������</param>
-    /// <returns></returns>
-    /// 
     public async Task<bool> AddUserInChat(AddUserInChatDto addUserInChatDto)
     {
         var existingChat = await _dbContext.UserChats.FirstOrDefaultAsync(c => c.Id_user == addUserInChatDto.id_user && c.Id_chat == addUserInChatDto.id_chat);
