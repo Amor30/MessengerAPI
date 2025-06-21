@@ -72,14 +72,19 @@ public class UserService
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        
+        user.Token = tokenString;
+        await _userManager.UpdateAsync(user);
+
+        return tokenString;
     }
 
     /// <summary>
-    /// ѕолучение списка пользователей чата
+    /// ????????? ?????? ????????????? ????
     /// </summary>
-    /// <param name="idChat">ID чата</param>
-    /// <returns>—писок участников чата</returns>
+    /// <param name="idChat">ID ????</param>
+    /// <returns>?????? ?????????? ????</returns>
 
     public async Task<List<ApplicationUser>> GetListUser(int idChat)
     {
@@ -95,9 +100,9 @@ public class UserService
     }
 
     /// <summary>
-    /// ѕолучение всех пользователей
+    /// ????????? ???? ?????????????
     /// </summary>
-    /// <returns>список пользователей</returns>
+    /// <returns>?????? ?????????????</returns>
 
     public async Task<List<ApplicationUser>> GetAllUser()
     {

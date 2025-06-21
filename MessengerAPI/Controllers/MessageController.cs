@@ -7,7 +7,6 @@ namespace MessengerAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class MessageController : BaseController
 {
     private readonly MessageService _messageService;

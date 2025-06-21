@@ -15,7 +15,7 @@ public class ChatService
         _dbContext = dbContext;
     }
 
-    public async Task<Chat> CreateGroupChat(CreateChatDto createChatDto)
+    public async Task<Chat> CreateGroupChat(CreateChatDto createChatDto, int userId)
     {
         var chat = new Chat
         {
@@ -27,6 +27,15 @@ public class ChatService
         
         _dbContext.Chats.Add(chat);
         await _dbContext.SaveChangesAsync();
+        
+        var userChat = new User_chats
+        {
+            Id_user = userId,
+            Id_chat = chat.Id
+        };
+        _dbContext.UserChats.Add(userChat);
+        await _dbContext.SaveChangesAsync();
+
         return chat;
     }
 

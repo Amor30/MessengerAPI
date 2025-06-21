@@ -10,7 +10,6 @@ namespace MessengerAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class ChatController : BaseController
 {
     private readonly ChatService _chatService;
@@ -25,8 +24,17 @@ public class ChatController : BaseController
     {
         try
         {
-            var chat = await _chatService.CreateGroupChat(createChatDto);
-            return CreatedAtAction(nameof(CreateGroupChat), new { id = chat.Id }, chat);
+            var userId = GetUserId();
+            var chat = await _chatService.CreateGroupChat(createChatDto, userId);
+            var chatDto = new ChatDto
+            {
+                Id = chat.Id,
+                Chat_name = chat.Chat_name,
+                Create_date = chat.Create_date,
+                Id_type_chat = chat.Id_type_chat,
+                InvitationGuid = chat.InvitationGuid
+            };
+            return CreatedAtAction(nameof(CreateGroupChat), new { id = chat.Id }, chatDto);
         }
         catch (Exception ex)
         {

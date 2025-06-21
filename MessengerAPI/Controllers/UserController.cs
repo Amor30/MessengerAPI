@@ -54,12 +54,7 @@ public class UsersController : BaseController
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-
-    /// <summary>
-    /// Получение списка участников группового чата
-    /// </summary>
-    /// <param name="idChat">Id чата</param>
-    /// <returns>Список участников чата</returns>
+    
 
     [HttpGet("user_list")]
     public async Task<IActionResult> GetListUser([FromQuery] int idChat)
@@ -69,7 +64,7 @@ public class UsersController : BaseController
             var result = await _userService.GetListUser(idChat);
             if (result == null || result.Count == 0)
             {
-                return NotFound("В чате еще нет участников");
+                return NotFound("пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
             }
             var userDtos = MapToUserDtos(result);
             return Ok(userDtos);
@@ -84,12 +79,6 @@ public class UsersController : BaseController
         }
     }
 
-    /// <summary>
-    /// Список всех пользователей
-    /// </summary>
-    /// <param name="idChat"></param>
-    /// <returns>список пользователей</returns>
-
     [HttpGet("all_user")]
     public async Task<IActionResult> GetAllUser()
     {
@@ -98,7 +87,7 @@ public class UsersController : BaseController
             var result = await _userService.GetAllUser();
             if (result == null || result.Count == 0)
             {
-                return NotFound("Список пользователей пуст.");
+                return NotFound("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.");
             }
             var userDtos = MapToUserDtos(result);
             return Ok(userDtos);

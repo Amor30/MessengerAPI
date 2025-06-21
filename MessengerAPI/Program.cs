@@ -2,7 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using MessengerAPI.Models;
 using MessengerAPI.Services;
 using Microsoft.AspNetCore.Identity;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,38 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<MessageService>();
 
+// Настройка JWT-авторизации
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+        // Отладка (опционально)
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError("Authentication failed: {Error}", context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("Token validated successfully");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,7 +74,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
- 
+
 using (var scope = app.Services.CreateScope())
 {
     var service = scope.ServiceProvider;
@@ -49,4 +84,4 @@ using (var scope = app.Services.CreateScope())
     await SeedData.Initialize(service);
 }
 
- app.Run();
+app.Run();
