@@ -94,43 +94,34 @@ public class ChatController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-
-    /// <summary>
-    /// ��������� ������ ��������� �����
-    /// </summary>
-    /// <returns>������ ��������� ����� � ������������</returns>
-
-[HttpGet("chats")]
-public async Task<IActionResult> GetChat()
-{
-    try
+    
+    [HttpGet("chats")]
+    public async Task<IActionResult> GetChat()
     {
-        var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
-        if (string.IsNullOrEmpty(userIdHeader) || !int.TryParse(userIdHeader, out var userId))
+        try
         {
-            return Unauthorized("Invalid or missing UserId in header.");
+            var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrEmpty(userIdHeader) || !int.TryParse(userIdHeader, out var userId))
+            {
+                return Unauthorized("Invalid or missing UserId in header.");
+            }
+
+            var result = await _chatService.GetChatsByUser(userId);
+            if (result == null)
+            {
+                return BadRequest("У пользователя нет доступных чатов");
+            }
+            return Ok(result);
         }
-
-        var result = await _chatService.GetChatsByUser(userId);
-        if (result == null)
-            return BadRequest("У пользователя нет доступных чатов");
-        return Ok(result);
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
-    catch (InvalidOperationException ex)
-    {
-        return NotFound(ex.Message);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Internal server error: {ex.Message}");
-    }
-}
-
-    /// <summary>
-    /// �������� ��� �������� ������� ����
-    /// </summary>
-    /// <param name="idChat">Id ����</param>
-    /// <returns>������ ���������� ����</returns>
 
     [HttpPost("personal")]
     public async Task<IActionResult> CreatePersonalChat([FromBody] CreatePersonalChatDto createPersonalChatDto)
@@ -143,12 +134,16 @@ public async Task<IActionResult> GetChat()
                 return Unauthorized("Invalid or missing UserId in header.");
             }
 
-            var result = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
-            if (result == null)
+            var chat = await _chatService.CreatePersonalChat(createPersonalChatDto, userId);
+            var chatDto = new ChatDto
             {
-                return StatusCode(500, "Не удалось создать чат.");
-            }
-            return Ok(result);
+                Id = chat.Id,
+                Chat_name = chat.Chat_name,
+                Create_date = chat.Create_date,
+                Id_type_chat = chat.Id_type_chat,
+                InvitationGuid = chat.InvitationGuid
+            };
+            return CreatedAtAction(nameof(CreatePersonalChat), new { id = chat.Id }, chatDto);
         }
         catch (InvalidOperationException ex)
         {
@@ -159,12 +154,6 @@ public async Task<IActionResult> GetChat()
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-
-    /// <summary>
-    /// ���������� ������������ � ��������� ���
-    /// </summary>
-    /// <param name="addUserInChatDto">������� ������</param>
-    /// <returns>IActionResult</returns>
 
     [HttpPost("add_user")]
     public async Task<IActionResult> AddUserInChat([FromBody] AddUserInChatDto addUserInChatDto)
